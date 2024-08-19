@@ -1,52 +1,73 @@
+import tkinter as tk
+from tkinter import scrolledtext, messagebox
 import requests
 from bs4 import BeautifulSoup
 
 def fetch_article_content(url):
-    # Send a GET request to the URL
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        messagebox.showerror("Error", f"Failed to retrieve the article: {e}")
+        return None, None
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Parse the HTML content
-        soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extract the title
-        title = soup.find('h1').get_text() if soup.find('h1') else "No title found"
+    title = soup.find('h1').get_text() if soup.find('h1') else "No title found"
+    paragraphs = soup.find_all('p')
 
-        # Extract all paragraphs
-        paragraphs = soup.find_all('p')
+    article_text = ""
+    capture = False
 
-        # Initialize variables to capture relevant content
-        article_text = ""
-        capture = False
+    for paragraph in paragraphs:
+        text = paragraph.get_text().strip()
 
-        for paragraph in paragraphs:
-            text = paragraph.get_text().strip()
+        if "your digital subscription" in text.lower():
+            capture = True
+            continue
 
-            # Start capturing after the subscription notice
-            if "your digital subscription" in text.lower():
-                capture = True
-                continue  # Skip the subscription notice itself
+        if "sign up to receive the courier's news alerts" in text.lower():
+            break
 
-            # Stop capturing before the newsletter sign-up
-            if "sign up to receive the courier's news alerts" in text.lower():
-                break
+        if capture:
+            article_text += text + "\n"
 
-            if capture:
-                article_text += text + "\n"
+    return title, article_text.strip()
 
-        return title, article_text.strip()
-    else:
-        return None, f"Failed to retrieve the article. Status code: {response.status_code}"
-
-# Example URLs from the site (replace with actual URLs)
-urls = [
-    "https://www.thecourier.com.au/story/8344520/student-computer-hackers-learn-skills-of-defence/",
-    # Add more URLs here
-]
-
-for url in urls:
+def display_content():
+    url = url_entry.get()
     title, content = fetch_article_content(url)
-    print(f"Title: {title}\n")
-    print(f"Content: {content}\n")
-    print("="*80)
+
+    if content:
+        title_label.config(text=f"Title: {title}")
+        text_area.delete(1.0, tk.END)
+        text_area.insert(tk.INSERT, content)
+    else:
+        text_area.delete(1.0, tk.END)
+        title_label.config(text="Title: ")
+
+# Create the main window
+root = tk.Tk()
+root.title("Article Fetcher")
+
+# Create URL input
+url_label = tk.Label(root, text="Enter Article URL:")
+url_label.pack(pady=5)
+
+url_entry = tk.Entry(root, width=50)
+url_entry.pack(pady=5)
+
+# Create fetch button
+fetch_button = tk.Button(root, text="Fetch Content", command=display_content)
+fetch_button.pack(pady=10)
+
+# Create title display
+title_label = tk.Label(root, text="Title: ", font=("Arial", 12, "bold"))
+title_label.pack(pady=5)
+
+# Create text area to display content
+text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=60, height=20, font=("Arial", 10))
+text_area.pack(pady=5)
+
+# Start the main loop
+root.mainloop()
