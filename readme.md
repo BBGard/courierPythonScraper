@@ -49,7 +49,7 @@ This program is intended solely for educational purposes and personal use. It sh
    After installing the required libraries, you can run the application using Python:
 
    ```bash
-   python article_fetcher_gui.py
+   python scraper.py
    ```
 
 ## Usage Instructions
@@ -61,14 +61,8 @@ This program is intended solely for educational purposes and personal use. It sh
 
 ## Limitations
 
-- **Website-Specific**: This tool is designed to work specifically with articles from "The Courier" website. It may not function correctly with other websites.
+- **Website-Specific**: This tool is designed to work specifically with articles from "The Courier" website. It will not function correctly with other websites.
 - **Content Structure Dependency**: The script relies on the specific HTML structure of "The Courier" articles, including specific phrases to identify content sections. If the website changes its structure, the script may need adjustments.
-
-## Future Enhancements
-
-- **Support for Multiple Sites**: Expand functionality to support content extraction from other news websites.
-- **Error Handling**: Improve error handling for various edge cases, such as incorrect URLs or network issues.
-- **Save and Export**: Add the ability to save the extracted content as a text file or PDF.
 
 ## Conclusion
 
