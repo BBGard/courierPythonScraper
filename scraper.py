@@ -3,6 +3,36 @@ from tkinter import scrolledtext, messagebox
 import requests
 from bs4 import BeautifulSoup
 
+# def fetch_article_content(url):
+#     try:
+#         response = requests.get(url)
+#         response.raise_for_status()
+#     except requests.exceptions.RequestException as e:
+#         messagebox.showerror("Error", f"Failed to retrieve the article: {e}")
+#         return None, None
+
+#     soup = BeautifulSoup(response.text, 'html.parser')
+
+#     title = soup.find('h1').get_text() if soup.find('h1') else "No title found"
+#     paragraphs = soup.find_all('p')
+
+#     article_text = ""
+#     capture = False
+
+#     for paragraph in paragraphs:
+#         text = paragraph.get_text().strip()
+
+#         if "your digital subscription" in text.lower():
+#             capture = True
+#             continue
+
+#         if "sign up to receive the courier's news alerts" in text.lower():
+#             break
+
+#         if capture:
+#             article_text += text + "\n"
+
+#     return title, article_text.strip()
 def fetch_article_content(url):
     try:
         response = requests.get(url)
@@ -18,6 +48,13 @@ def fetch_article_content(url):
 
     article_text = ""
     capture = False
+    stop_phrases = [
+        "sign up to receive the courier's news alerts",
+        "today's top stories curated by our news team",
+        # "weekly",
+        # "daily",
+        # "advertisement",
+    ]
 
     for paragraph in paragraphs:
         text = paragraph.get_text().strip()
@@ -26,13 +63,14 @@ def fetch_article_content(url):
             capture = True
             continue
 
-        if "sign up to receive the courier's news alerts" in text.lower():
+        if any(phrase in text.lower() for phrase in stop_phrases):
             break
 
         if capture:
             article_text += text + "\n"
 
     return title, article_text.strip()
+
 
 def display_content():
     url = url_entry.get()
